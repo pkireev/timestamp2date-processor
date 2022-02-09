@@ -1,0 +1,4 @@
+# Created at 2022-02-09T17:35:38.457
+Boot Manifest-JAR contains absolute paths in classpath 'E:\dev\Nifi\timestamp2date\timestamp2date-processor\nifi-timestamp2date-processors\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+
