@@ -111,20 +111,24 @@ public class Timestamp2DateProcessor extends AbstractProcessor {
     public void onTrigger(final ProcessContext context, final ProcessSession session) {
         FlowFile flowFile = session.get();
 
-        if ( flowFile != null ) {
-            Set<String> parsedAttributes = parseAttributes(context.getProperty(ATTRIBUTES_LIST).getValue());
+        if ( flowFile == null ) {
+            return;
+        }
 
-            if (parsedAttributes != null) {
-                for (String attribute : parsedAttributes) {
-                    String attributeValue = flowFile.getAttribute(attribute);
+        Set<String> parsedAttributes = parseAttributes(context.getProperty(ATTRIBUTES_LIST).getValue());
 
-                    if (!attributeValue.isEmpty() && attributeValue.contains("/Date(")) {
-                        int x1 = attributeValue.indexOf('(');
-                        int x2 = attributeValue.indexOf(')');
+        if (parsedAttributes != null) {
+            for (String attribute : parsedAttributes) {
+                String attributeValue = flowFile.getAttribute(attribute);
 
-                        if (x1 >= 0 && x2 > x1) {
-                            String timestamp = attributeValue.substring(x1 + 1, x2);
+                if (attributeValue != null && !attributeValue.isEmpty() && attributeValue.contains("/Date(")) {
+                    int x1 = attributeValue.indexOf('(');
+                    int x2 = attributeValue.indexOf(')');
 
+                    if (x1 >= 0 && x2 > x1) {
+                        String timestamp = attributeValue.substring(x1 + 1, x2).trim();
+
+                        if (!timestamp.isEmpty()) {
                             try {
                                 long tsAsLong = Long.parseLong(timestamp);
                                 Timestamp stamp = new Timestamp(tsAsLong);
@@ -132,19 +136,16 @@ public class Timestamp2DateProcessor extends AbstractProcessor {
                                 String result = stamp.toLocalDateTime().toString().split("T")[0];
                                 flowFile = session.putAttribute(flowFile, attribute, result);
 
-
                             } catch (Exception ignored) {
 
                             }
-
                         }
                     }
-
                 }
 
-                session.transfer(flowFile, REL_SUCCESS);
             }
-
         }
+
+        session.transfer(flowFile, REL_SUCCESS);
     }
 }
